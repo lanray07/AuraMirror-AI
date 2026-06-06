@@ -20,9 +20,9 @@ final class AppViewModel {
     let ai: MockAIService
     let subscriptions: SubscriptionService
 
-    init(ai: MockAIService = MockAIService(), subscriptions: SubscriptionService = SubscriptionService()) {
-        self.ai = ai
-        self.subscriptions = subscriptions
+    init(ai: MockAIService? = nil, subscriptions: SubscriptionService? = nil) {
+        self.ai = ai ?? MockAIService()
+        self.subscriptions = subscriptions ?? SubscriptionService()
     }
 
     func completeOnboarding(profile: OnboardingProfileDraft) async {
