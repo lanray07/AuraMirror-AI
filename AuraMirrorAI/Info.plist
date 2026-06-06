@@ -28,6 +28,8 @@
 	<string>AuraMirror AI uses the microphone for voice stylist requests.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>AuraMirror AI transcribes voice stylist questions into style prompts.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
