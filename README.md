@@ -10,6 +10,19 @@ The app is intentionally supportive and style-focused. It does not rate attracti
 
 Open `AuraMirrorAI.xcodeproj` in Xcode 15 or later and run the `AuraMirror AI` scheme on an iOS 17+ simulator or device.
 
+## GitHub App Store Upload
+
+The repository includes a manual GitHub Actions workflow at `.github/workflows/ios-app-store-upload.yml`.
+
+Add these repository secrets in GitHub before running it:
+
+- `APPLE_TEAM_ID` - your Apple Developer Team ID.
+- `ASC_KEY_ID` - App Store Connect API key ID.
+- `ASC_ISSUER_ID` - App Store Connect issuer ID.
+- `ASC_PRIVATE_KEY` - full contents of the `AuthKey_XXXXXXXXXX.p8` private key.
+
+Run **Actions > iOS App Store Upload > Run workflow**. The workflow archives the `AuraMirror AI` scheme, exports an App Store Connect IPA, uploads it to App Store Connect, and keeps the IPA as a GitHub Actions artifact.
+
 Mock AI is enabled by default through `MockAIService`. `RemoteAIService` is scaffolded against:
 
 ```http

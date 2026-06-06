@@ -1,0 +1,151 @@
+name: iOS App Store Upload
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: "CFBundleVersion to archive"
+        required: false
+        default: ""
+
+concurrency:
+  group: ios-app-store-upload
+  cancel-in-progress: false
+
+jobs:
+  archive-and-upload:
+    name: Archive and upload AuraMirror AI
+    runs-on: macos-latest
+    timeout-minutes: 60
+
+    env:
+      PROJECT_PATH: AuraMirrorAI.xcodeproj
+      SCHEME: AuraMirror AI
+      CONFIGURATION: Release
+      BUNDLE_ID: com.auramirror.ai
+      ARCHIVE_PATH: ${{ github.workspace }}/build/AuraMirrorAI.xcarchive
+      EXPORT_PATH: ${{ github.workspace }}/build/export
+      ASC_KEY_DIR: ${{ github.workspace }}/private_keys
+      ASC_KEY_PATH: ${{ github.workspace }}/private_keys/AuthKey_${{ secrets.ASC_KEY_ID }}.p8
+      BUILD_NUMBER: ${{ inputs.build_number != '' && inputs.build_number || github.run_number }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app
+          xcodebuild -version
+
+      - name: Validate required secrets
+        run: |
+          missing=0
+          for name in APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing required GitHub secret: $name"
+              missing=1
+            fi
+          done
+          exit "$missing"
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+
+      - name: Install App Store Connect API key
+        run: |
+          mkdir -p "$ASC_KEY_DIR"
+          printf '%s' "$ASC_PRIVATE_KEY" > "$ASC_KEY_PATH"
+          chmod 600 "$ASC_KEY_PATH"
+        env:
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+
+      - name: Resolve packages
+        run: |
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project "$PROJECT_PATH" \
+            -scheme "$SCHEME"
+
+      - name: Archive
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project "$PROJECT_PATH" \
+            -scheme "$SCHEME" \
+            -configuration "$CONFIGURATION" \
+            -destination "generic/platform=iOS" \
+            -archivePath "$ARCHIVE_PATH" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            CODE_SIGN_STYLE=Automatic
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+
+      - name: Create export options
+        run: |
+          cat > ExportOptions.plist <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportPath "$EXPORT_PATH" \
+            -exportOptionsPlist ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+
+      - name: Upload to App Store Connect
+        run: |
+          ipa="$(find "$EXPORT_PATH" -maxdepth 1 -name '*.ipa' -print -quit)"
+          if [ -z "$ipa" ]; then
+            echo "::error::No IPA was exported."
+            exit 1
+          fi
+          xcrun iTMSTransporter \
+            -m upload \
+            -assetFile "$ipa" \
+            -apiKey "$ASC_KEY_ID" \
+            -apiIssuer "$ASC_ISSUER_ID" \
+            -v informational
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          API_PRIVATE_KEYS_DIR: ${{ github.workspace }}/private_keys
+
+      - name: Upload IPA artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AuraMirrorAI-ipa
+          path: build/export/*.ipa
+          if-no-files-found: ignore
