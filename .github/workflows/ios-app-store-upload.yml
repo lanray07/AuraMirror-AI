@@ -25,7 +25,7 @@ jobs:
       PROJECT_PATH: AuraMirrorAI.xcodeproj
       SCHEME: AuraMirror AI
       CONFIGURATION: Release
-      BUNDLE_ID: com.auramirror.ai
+      BUNDLE_ID: com.auramirrorai.app
       ARCHIVE_PATH: ${{ github.workspace }}/build/AuraMirrorAI.xcarchive
       EXPORT_PATH: ${{ github.workspace }}/build/export
       RESULT_BUNDLE_PATH: ${{ github.workspace }}/build/AuraMirrorAI.xcresult
