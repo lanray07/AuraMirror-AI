@@ -104,6 +104,13 @@ jobs:
           ASC_KEY_ID: ${{ env.ASC_KEY_ID_VALUE }}
           ASC_ISSUER_ID: ${{ env.ASC_ISSUER_ID_VALUE }}
 
+      - name: Export Xcode diagnostics
+        if: failure()
+        run: |
+          mkdir -p build/diagnostics
+          xcrun xcresulttool get --legacy --path "$RESULT_BUNDLE_PATH" --format json > build/diagnostics/xcresult.json || true
+          find "$RESULT_BUNDLE_PATH" -type f -maxdepth 3 -print > build/diagnostics/xcresult-files.txt || true
+
       - name: Create export options
         run: |
           cat > ExportOptions.plist <<'PLIST'
@@ -171,4 +178,12 @@ jobs:
         with:
           name: AuraMirrorAI-xcresult
           path: build/AuraMirrorAI.xcresult
+          if-no-files-found: ignore
+
+      - name: Upload Xcode diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AuraMirrorAI-xcode-diagnostics
+          path: build/diagnostics
           if-no-files-found: ignore
