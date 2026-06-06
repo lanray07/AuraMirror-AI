@@ -28,6 +28,7 @@ jobs:
       BUNDLE_ID: com.auramirror.ai
       ARCHIVE_PATH: ${{ github.workspace }}/build/AuraMirrorAI.xcarchive
       EXPORT_PATH: ${{ github.workspace }}/build/export
+      RESULT_BUNDLE_PATH: ${{ github.workspace }}/build/AuraMirrorAI.xcresult
       ASC_KEY_DIR: ${{ github.workspace }}/private_keys
       ASC_KEY_ID_VALUE: ${{ secrets.ASC_KEY_ID || secrets.APP_STORE_CONNECT_KEY_ID || secrets.APP_STORE_CONNECT_API_KEY_ID || secrets.APPSTORE_CONNECT_KEY_ID }}
       ASC_ISSUER_ID_VALUE: ${{ secrets.ASC_ISSUER_ID || secrets.APP_STORE_CONNECT_ISSUER_ID || secrets.APP_STORE_CONNECT_API_ISSUER_ID || secrets.APPSTORE_CONNECT_ISSUER_ID }}
@@ -86,6 +87,7 @@ jobs:
             -configuration "$CONFIGURATION" \
             -destination "generic/platform=iOS" \
             -archivePath "$ARCHIVE_PATH" \
+            -resultBundlePath "$RESULT_BUNDLE_PATH" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$ASC_KEY_ID" \
@@ -161,4 +163,12 @@ jobs:
         with:
           name: AuraMirrorAI-ipa
           path: build/export/*.ipa
+          if-no-files-found: ignore
+
+      - name: Upload Xcode result bundle
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AuraMirrorAI-xcresult
+          path: build/AuraMirrorAI.xcresult
           if-no-files-found: ignore
