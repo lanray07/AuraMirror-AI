@@ -22,6 +22,7 @@
 		A00100000000000000000013 /* MainViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000013 /* MainViews.swift */; };
 		A00100000000000000000014 /* FeatureViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000014 /* FeatureViews.swift */; };
 		A00100000000000000000015 /* WidgetAndWatchPlaceholders.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000015 /* WidgetAndWatchPlaceholders.swift */; };
+		A00100000000000000000016 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A00200000000000000000018 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		A00200000000000000000015 /* WidgetAndWatchPlaceholders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetsPlaceholder/WidgetAndWatchPlaceholders.swift; sourceTree = "<group>"; };
 		A00200000000000000000016 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A00200000000000000000017 /* AuraMirror AI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AuraMirror AI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A00200000000000000000018 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +63,7 @@
 			isa = PBXGroup;
 			children = (
 				A00200000000000000000016 /* Info.plist */,
+				A00200000000000000000018 /* Assets.xcassets */,
 				A00200000000000000000001 /* AuraMirrorAIApp.swift */,
 				A00200000000000000000002 /* Models.swift */,
 				A00200000000000000000003 /* AppViewModel.swift */,
@@ -133,7 +136,7 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A00700000000000000000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		A00700000000000000000001 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (A00100000000000000000016 /* Assets.xcassets in Resources */); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -201,6 +204,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = AuraMirrorAI/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -217,6 +221,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = AuraMirrorAI/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
