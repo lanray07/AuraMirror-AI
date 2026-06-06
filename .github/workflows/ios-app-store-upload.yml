@@ -153,12 +153,12 @@ jobs:
             echo "::error::No IPA was exported."
             exit 1
           fi
-          xcrun iTMSTransporter \
-            -m upload \
-            -assetFile "$ipa" \
-            -apiKey "$ASC_KEY_ID" \
-            -apiIssuer "$ASC_ISSUER_ID" \
-            -v informational
+          xcrun altool \
+            --upload-app \
+            --type ios \
+            --file "$ipa" \
+            --apiKey "$ASC_KEY_ID" \
+            --apiIssuer "$ASC_ISSUER_ID"
         env:
           ASC_KEY_ID: ${{ env.ASC_KEY_ID_VALUE }}
           ASC_ISSUER_ID: ${{ env.ASC_ISSUER_ID_VALUE }}
