@@ -13,8 +13,7 @@ final class SubscriptionService {
 
     private let productIDs = [
         "auramirror.premium.monthly",
-        "auramirror.premium.yearly",
-        "auramirror.elite.monthly"
+        "auramirror.premium.yearly"
     ]
 
     func loadProducts() async {

@@ -246,6 +246,7 @@ struct PaywallView: View {
     @Bindable var subscriptions: SubscriptionService
     private let privacyURL = URL(string: "https://github.com/lanray07/AuraMirror-AI/blob/main/PRIVACY_POLICY.md")!
     private let eulaURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    private let submittedPlans: [AuraPlan] = [.premiumMonthly, .premiumYearly]
 
     var body: some View {
         ZStack {
@@ -253,7 +254,7 @@ struct PaywallView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     EditorialTitle(eyebrow: "Aura Premium", title: "Unlock deeper personal image intelligence.", subtitle: "Unlimited AI analysis, wardrobe scanning, outfit generation, profile photo coaching, and glow-up roadmaps.")
-                    ForEach(AuraPlan.allCases.filter { $0 != .free }) { plan in
+                    ForEach(submittedPlans) { plan in
                         Button {
                             Task {
                                 await subscriptions.purchase(plan)
@@ -302,7 +303,7 @@ struct PaywallView: View {
                     .tint(AuraColor.ivory)
                     .disabled(subscriptions.isLoading)
                     StyleSection(title: "Free", items: ["Limited analyses", "Limited outfits", "Limited wardrobe scans"])
-                    StyleSection(title: "Aura Elite", items: ["Advanced Aura DNA", "Luxury styling modes", "Premium themes", "Advanced analytics", "Exclusive archetypes"])
+                    StyleSection(title: "Aura Premium", items: ["Advanced Aura DNA", "Luxury styling modes", "Premium themes", "Advanced analytics", "Exclusive archetypes"])
                     StyleSection(title: "Subscription Details", items: [
                         "Payment is charged to your Apple ID at confirmation of purchase.",
                         "Subscriptions automatically renew unless canceled at least 24 hours before the end of the current period.",

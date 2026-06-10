@@ -159,7 +159,7 @@ struct UpgradeBanner: View {
             Image(systemName: "crown.fill")
                 .foregroundStyle(AuraColor.gold)
             VStack(alignment: .leading) {
-                Text("Aura Elite")
+                Text("Aura Premium")
                     .font(.headline)
                 Text("Unlock advanced Aura DNA, luxury modes, and premium analytics.")
                     .font(.footnote)
