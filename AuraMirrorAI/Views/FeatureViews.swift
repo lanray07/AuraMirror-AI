@@ -244,6 +244,8 @@ struct LookCollectionsView: View {
 struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var subscriptions: SubscriptionService
+    private let privacyURL = URL(string: "https://github.com/lanray07/AuraMirror-AI/blob/main/PRIVACY_POLICY.md")!
+    private let eulaURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
 
     var body: some View {
         ZStack {
@@ -253,26 +255,67 @@ struct PaywallView: View {
                     EditorialTitle(eyebrow: "Aura Premium", title: "Unlock deeper personal image intelligence.", subtitle: "Unlimited AI analysis, wardrobe scanning, outfit generation, profile photo coaching, and glow-up roadmaps.")
                     ForEach(AuraPlan.allCases.filter { $0 != .free }) { plan in
                         Button {
-                            subscriptions.purchasePlaceholder(plan)
-                            dismiss()
+                            Task {
+                                await subscriptions.purchase(plan)
+                                if subscriptions.activePlan == plan {
+                                    dismiss()
+                                }
+                            }
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text(plan.rawValue)
                                         .font(.headline)
-                                    Text(plan.price)
+                                    Text("\(subscriptions.displayPrice(for: plan)) / \(plan.durationText)")
                                         .font(.subheadline)
                                         .foregroundStyle(AuraColor.gold)
+                                    Text(plan.renewalText)
+                                        .font(.caption)
+                                        .foregroundStyle(AuraColor.ivory.opacity(0.7))
                                 }
                                 Spacer()
-                                Image(systemName: "chevron.right")
+                                Image(systemName: subscriptions.isLoading ? "hourglass" : "chevron.right")
                             }
                             .foregroundStyle(AuraColor.ivory)
                         }
+                        .disabled(subscriptions.isLoading || subscriptions.product(for: plan) == nil)
                         .luxuryCard()
                     }
+                    if let purchaseError = subscriptions.purchaseError {
+                        Text(purchaseError)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .luxuryCard()
+                    } else if let purchaseMessage = subscriptions.purchaseMessage {
+                        Text(purchaseMessage)
+                            .font(.footnote)
+                            .foregroundStyle(AuraColor.ivory.opacity(0.78))
+                            .luxuryCard()
+                    }
+                    Button {
+                        Task { await subscriptions.restorePurchases() }
+                    } label: {
+                        Label("Restore Purchases", systemImage: "arrow.clockwise")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(AuraColor.ivory)
+                    .disabled(subscriptions.isLoading)
                     StyleSection(title: "Free", items: ["Limited analyses", "Limited outfits", "Limited wardrobe scans"])
                     StyleSection(title: "Aura Elite", items: ["Advanced Aura DNA", "Luxury styling modes", "Premium themes", "Advanced analytics", "Exclusive archetypes"])
+                    StyleSection(title: "Subscription Details", items: [
+                        "Payment is charged to your Apple ID at confirmation of purchase.",
+                        "Subscriptions automatically renew unless canceled at least 24 hours before the end of the current period.",
+                        "Manage or cancel subscriptions in your App Store account settings."
+                    ])
+                    HStack(spacing: 18) {
+                        Link("Privacy Policy", destination: privacyURL)
+                        Link("Terms of Use (EULA)", destination: eulaURL)
+                    }
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(AuraColor.gold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .luxuryCard()
                 }
                 .padding(20)
             }

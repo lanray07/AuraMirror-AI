@@ -30,12 +30,37 @@ enum AuraPlan: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var price: String {
+    var productID: String? {
+        switch self {
+        case .free: return nil
+        case .premiumMonthly: return "auramirror.premium.monthly"
+        case .premiumYearly: return "auramirror.premium.yearly"
+        case .eliteMonthly: return "auramirror.elite.monthly"
+        }
+    }
+
+    var fallbackPrice: String {
         switch self {
         case .free: return "Included"
         case .premiumMonthly: return "GBP 12.99"
         case .premiumYearly: return "GBP 99.99"
         case .eliteMonthly: return "GBP 24.99"
+        }
+    }
+
+    var durationText: String {
+        switch self {
+        case .free: return "No subscription"
+        case .premiumMonthly, .eliteMonthly: return "1 month"
+        case .premiumYearly: return "1 year"
+        }
+    }
+
+    var renewalText: String {
+        switch self {
+        case .free: return "Free preview access"
+        case .premiumMonthly, .eliteMonthly: return "Auto-renews monthly until canceled"
+        case .premiumYearly: return "Auto-renews yearly until canceled"
         }
     }
 }
