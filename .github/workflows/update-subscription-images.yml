@@ -1,0 +1,44 @@
+name: Update Subscription Images
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "subscription-images-*"
+
+concurrency:
+  group: update-subscription-images
+  cancel-in-progress: false
+
+jobs:
+  upload-images:
+    name: Upload price-free subscription images
+    runs-on: macos-26
+    timeout-minutes: 20
+
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID || secrets.APP_STORE_CONNECT_KEY_ID || secrets.APP_STORE_CONNECT_API_KEY_ID || secrets.APPSTORE_CONNECT_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID || secrets.APP_STORE_CONNECT_ISSUER_ID || secrets.APP_STORE_CONNECT_API_ISSUER_ID || secrets.APPSTORE_CONNECT_ISSUER_ID }}
+      ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY || secrets.APP_STORE_CONNECT_PRIVATE_KEY || secrets.APP_STORE_CONNECT_API_PRIVATE_KEY || secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
+      ASC_MONTHLY_SUBSCRIPTION_ID: "6777476535"
+      ASC_YEARLY_SUBSCRIPTION_ID: "6777477661"
+      ASC_MONTHLY_IMAGE_PATH: AppStoreAssets/subscription-promotional-1024x1024/promo-aura-premium-monthly.png
+      ASC_YEARLY_IMAGE_PATH: AppStoreAssets/subscription-promotional-1024x1024/promo-aura-premium-yearly.png
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        run: |
+          missing=0
+          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing required GitHub secret or alias: $name"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Upload promoted subscription images
+        run: ruby tools/upload_subscription_images.rb
