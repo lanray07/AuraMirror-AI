@@ -176,6 +176,75 @@ def upload_subscription_image(subscription_id, image_path, token)
   puts "Committed #{path.basename}: #{state}"
 end
 
+def review_submission_id
+  value = ENV["ASC_REVIEW_SUBMISSION_ID"]
+  return nil if value.nil? || value.strip.empty?
+
+  value.strip
+end
+
+def resolve_review_submission_items(submission_id, token)
+  response = api_request(
+    "get",
+    "/reviewSubmissions/#{submission_id}/items",
+    token,
+    query: {
+      "fields[reviewSubmissionItems]" => "removed,resolved",
+      "limit" => "20"
+    }
+  )
+
+  items = response.fetch("data", [])
+  abort("Review submission #{submission_id} did not return any items") if items.empty?
+
+  items.each do |item|
+    item_id = item.fetch("id")
+    removed = item.dig("attributes", "removed")
+    resolved = item.dig("attributes", "resolved")
+    if removed || resolved
+      puts "Skipping review submission item #{item_id}: removed=#{removed.inspect} resolved=#{resolved.inspect}"
+      next
+    end
+
+    puts "Marking review submission item #{item_id} as resolved"
+    api_request(
+      "patch",
+      "/reviewSubmissionItems/#{item_id}",
+      token,
+      body: {
+        data: {
+          type: "reviewSubmissionItems",
+          id: item_id,
+          attributes: {
+            resolved: true
+          }
+        }
+      }
+    )
+  end
+end
+
+def resubmit_review_submission(submission_id, token)
+  puts "Resubmitting review submission #{submission_id}"
+  updated = api_request(
+    "patch",
+    "/reviewSubmissions/#{submission_id}",
+    token,
+    body: {
+      data: {
+        type: "reviewSubmissions",
+        id: submission_id,
+        attributes: {
+          submitted: true
+        }
+      }
+    }
+  )
+  state = updated.dig("data", "attributes", "state") || "(unknown)"
+  submitted = updated.dig("data", "attributes", "submitted")
+  puts "Review submission #{submission_id}: state=#{state} submitted=#{submitted.inspect}"
+end
+
 token = jwt_token
 
 [
@@ -184,4 +253,9 @@ token = jwt_token
 ].each do |subscription_id, image_path|
   delete_existing_images(subscription_id, token)
   upload_subscription_image(subscription_id, image_path, token)
+end
+
+if (submission_id = review_submission_id)
+  resolve_review_submission_items(submission_id, token)
+  resubmit_review_submission(submission_id, token)
 end

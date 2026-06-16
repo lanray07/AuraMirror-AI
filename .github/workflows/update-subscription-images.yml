@@ -22,6 +22,7 @@ jobs:
       ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY || secrets.APP_STORE_CONNECT_PRIVATE_KEY || secrets.APP_STORE_CONNECT_API_PRIVATE_KEY || secrets.APPSTORE_CONNECT_PRIVATE_KEY }}
       ASC_MONTHLY_SUBSCRIPTION_ID: "6777476535"
       ASC_YEARLY_SUBSCRIPTION_ID: "6777477661"
+      ASC_REVIEW_SUBMISSION_ID: "17117d0e-23a3-45b7-96db-e306b996bd5b"
       ASC_MONTHLY_IMAGE_PATH: AppStoreAssets/subscription-promotional-1024x1024/promo-aura-premium-monthly.png
       ASC_YEARLY_IMAGE_PATH: AppStoreAssets/subscription-promotional-1024x1024/promo-aura-premium-yearly.png
 
@@ -40,5 +41,5 @@ jobs:
           done
           exit "$missing"
 
-      - name: Upload promoted subscription images
+      - name: Upload promoted subscription images and resubmit review
         run: ruby tools/upload_subscription_images.rb
