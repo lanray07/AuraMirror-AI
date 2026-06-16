@@ -189,7 +189,6 @@ def resolve_review_submission_items(submission_id, token)
     "/reviewSubmissions/#{submission_id}/items",
     token,
     query: {
-      "fields[reviewSubmissionItems]" => "removed,resolved",
       "limit" => "20"
     }
   )
